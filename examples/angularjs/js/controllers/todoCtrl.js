@@ -8,8 +8,16 @@
 angular.module('todomvc')
 	.controller('TodoCtrl', function TodoCtrl($scope, $routeParams, $filter, todoStorage) {
 		'use strict';
-
-		var todos = $scope.todos = todoStorage.get();
+		var todos;
+		todoStorage.get($scope, todos).then(function(resolveData) {
+		todos = resolveData.data;
+		console.log(todos);
+		
+		//todos = $scope.todos;
+		//console.log($scope.todos);
+//		todos = JSON.stringify(todos);
+		//var test = angular.fromJson(todos);
+		//todos[0].push({'title': 'Uncompleted Item 8'});
 
 		$scope.newTodo = '';
 		$scope.editedTodo = null;
@@ -19,9 +27,12 @@ angular.module('todomvc')
 			$scope.completedCount = todos.length - $scope.remainingCount;
 			$scope.allChecked = !$scope.remainingCount;
 			if (newValue !== oldValue) { // This prevents unneeded calls to the local storage
-				todoStorage.put(todos);
+				//todoStorage.put(todos);
+				//todos = todos.newValue;
 			}
 		}, true);
+		
+		});
 
 		// Monitor the current route for changes and adjust the filter accordingly.
 		$scope.$on('$routeChangeSuccess', function () {
@@ -44,6 +55,8 @@ angular.module('todomvc')
 			});
 
 			$scope.newTodo = '';
+			//alert(todos);
+			todoStorage.put(todos);
 		};
 
 		$scope.editTodo = function (todo) {
@@ -59,6 +72,7 @@ angular.module('todomvc')
 			if (!todo.title) {
 				$scope.removeTodo(todo);
 			}
+			todoStorage.put(todos);
 		};
 
 		$scope.revertEditing = function (todo) {
@@ -68,17 +82,32 @@ angular.module('todomvc')
 
 		$scope.removeTodo = function (todo) {
 			todos.splice(todos.indexOf(todo), 1);
+			//console.log("todos 0 is");
+			//console.log(todos[0]);
+			//alert(todos);
+			todoStorage.put(todos);
+			//todos.splice(4,1);
+		};
+		
+		$scope.toggleDone = function (todo) {
+		  todo.completed = !todo.completed;
+		  //alert("now " +todo.completed);
+
+			todoStorage.put(todos);
+			//todos.splice(4,1);
 		};
 
 		$scope.clearCompletedTodos = function () {
 			$scope.todos = todos = todos.filter(function (val) {
 				return !val.completed;
 			});
+				todoStorage.put(todos);
 		};
 
 		$scope.markAll = function (completed) {
 			todos.forEach(function (todo) {
 				todo.completed = !completed;
 			});
+		  todoStorage.put(todos);
 		};
 	});
